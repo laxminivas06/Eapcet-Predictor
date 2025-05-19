@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EAMCET College Finder</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #FF6B6B;
+            --primary-hover: #FF5252;
+            --secondary-color: #4ECDC4;
+            --secondary-hover: #3DBDB4;
+            --accent-color: #FFE66D;
+            --accent-hover: #FFD700;
+            --text-dark: #292F36;
+            --text-medium: #4A4A4A;
+            --text-light: #F7FFF7;
+            --bg-light: #F7FFF7;
+            --bg-gradient: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%);
+            --white: #FFFFFF;
+            --shadow: 0 4px 20px rgba(0,0,0,0.1);
+            --party-colors: #FF6B6B, #4ECDC4, #FFE66D, #FF9F1C, #A463F2;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0;
+            background-color: var(--bg-light);
+            color: var(--text-medium);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: var(--bg-gradient);
+            background-attachment: fixed;
+            background-size: cover;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(255,255,255,0.9);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-radius: 0 0 15px 15px;
+            margin: 0 20px;
+            border: 2px solid var(--accent-color);
+        }
+        .header h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .header p {
+            color: var(--text-medium);
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        /* Main Layout Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        /* Top Section - No longer fixed */
+        .top-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            background-color: transparent;
+            padding: 0 20px 20px;
+            z-index: 900;
+            grid-column: 1 / -1;
+        }
+
+        /* Colleges List Container */
+        .colleges-container {
+            background-color: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            height: auto;
+            min-height: 300px;
+            overflow-y: auto;
+            border: 2px solid var(--secondary-color);
+        }
+
+        .stats-container {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(255,255,255,0.7);
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px dashed var(--primary-color);
+        }
+
+        .stats-title {
+            font-weight: bold;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+            margin-bottom: 0;
+            flex-grow: 1;
+        }
+
+        .stats-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            min-width: 60px;
+            text-align: right;
+            margin: 0 0 0 10px;
+            background-color: var(--accent-color);
+            padding: 5px 10px;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .college-list {
+            max-height: 180px;
+            overflow-y: auto;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
+        .college-list-item {
+            padding: 8px 5px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            background-color: rgba(255,255,255,0.7);
+            margin: 3px 0;
+            border-radius: 5px;
+        }
+
+        .college-list-item:hover {
+            color: var(--primary-color);
+            padding-left: 10px;
+            background-color: var(--accent-color);
+            transform: scale(1.02);
+        }
+
+        /* Developer Info Container */
+        .developer-container {
+            background-color: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            height: auto;
+            min-height: 300px;
+            overflow-y: auto;
+            border: 2px solid var(--accent-color);
+        }
+
+        .developer-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .developer-photo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid var(--primary-color);
+            margin: 0 auto 15px;
+            display: block;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .developer-info h2 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 1.4rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .developer-info p {
+            margin: 15px 0;
+            color: var(--text-medium);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            word-wrap: break-word;
+            hyphens: auto;
+            text-align: justify;
+            background-color: rgba(255,255,255,0.5);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .developer-info strong {
+            color: var(--primary-color);
+            white-space: nowrap;
+            display: inline-block;
+        }
+
+        /* Search Container */
+        .search-container {
+            grid-column: 1 / -1;
+            background-color: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--secondary-color);
+            margin-top: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-medium);
+            font-size: 1rem;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--secondary-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background-color: rgba(255,255,255,0.8);
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255,107,107,0.3);
+        }
+
+        button {
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        #search-btn {
+            background-color: var(--primary-color);
+            color: var(--white);
+            width: 100%;
+            box-shadow: 0 4px 0 rgba(210,80,80,0.8);
+        }
+        #search-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 rgba(210,80,80,0.8);
+        }
+        .voice-btn {
+            background-color: var(--secondary-color);
+            color: var(--white);
+            margin-left: 10px;
+            padding: 12px 15px;
+            box-shadow: 0 4px 0 rgba(60,180,170,0.8);
+        }
+        .voice-btn:hover {
+            background-color: var(--secondary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 rgba(60,180,170,0.8);
+        }
+
+        .flex-row {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Results Container */
+        #results {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .college-container {
+            background-color: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            border: 2px solid var(--accent-color);
+            transition: all 0.3s;
+        }
+
+        .college-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .college-header {
+            padding: 20px;
+            background-color: rgba(78,205,196,0.1);
+            border-bottom: 1px solid #eee;
+        }
+
+        .college-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .college-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+            color: var(--text-medium);
+            font-size: 0.9rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background-color: rgba(255,255,255,0.7);
+            padding: 5px 10px;
+            border-radius: 20px;
+            border: 1px solid var(--secondary-color);
+        }
+
+        .branches-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .branch-card {
+            background-color: rgba(255,255,255,0.8);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 2px solid var(--secondary-color);
+            transition: all 0.2s;
+        }
+
+        .branch-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            border-color: var(--primary-color);
+        }
+
+        .branch-name {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            border-bottom: 1px dashed var(--secondary-color);
+            padding-bottom: 5px;
+        }
+
+        .branch-detail {
+            margin: 8px 0;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-medium);
+            min-width: 100px;
+            display: inline-block;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 5px;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+        }
+        .OC { background-color: #FFE66D; color: #000; }
+        .BC-A { background-color: #FF9F1C; color: #fff; }
+        .BC-B { background-color: #FF6B6B; color: #fff; }
+        .BC-C { background-color: #A463F2; color: #fff; }
+        .BC-D { background-color: #4ECDC4; color: #fff; }
+        .BC-E { background-color: #6BFF6B; color: #000; }
+        .SC { background-color: #292F36; color: #fff; }
+        .ST { background-color: #1A535C; color: #fff; }
+        .EWS { background-color: #95A3B3; color: #fff; }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-medium);
+            font-size: 1.1rem;
+            background-color: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+        .no-results i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary-color);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: #FF6B6B;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            display: none;
+            font-weight: bold;
+        }
+
+        /* Animation for party theme */
+        @keyframes colorChange {
+            0% { background-color: var(--primary-color); }
+            20% { background-color: var(--secondary-color); }
+            40% { background-color: var(--accent-color); }
+            60% { background-color: #FF9F1C; }
+            80% { background-color: #A463F2; }
+            100% { background-color: var(--primary-color); }
+        }
+
+        .party-animation {
+            animation: colorChange 10s infinite;
+        }
+
+        /* Mobile View Adjustments */
+        @media (max-width: 992px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+
+            .top-section {
+                grid-template-columns: 1fr 1fr;
+                padding: 0 0 15px 0;
+            }
+
+            .colleges-container,
+            .developer-container {
+                min-height: 250px;
+            }
+
+            .search-container {
+                margin-top: 0;
+            }
+
+            .developer-photo {
+                width: 120px;
+                height: 120px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+
+            .developer-photo {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .developer-info h2 {
+                font-size: 1.2rem;
+            }
+            
+            .developer-info p {
+                font-size: 0.85rem;
+                margin: 10px 0;
+            }
+            
+            .stats-title {
+                font-size: 0.9rem;
+            }
+            
+            .stats-value {
+                font-size: 1.2rem;
+                width: 40px;
+                height: 40px;
+            }
+            
+            .college-list-item {
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .header {
+                margin: 0 10px;
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.3rem;
+            }
+
+            .top-section {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .developer-photo {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .developer-info h2 {
+                font-size: 1rem;
+            }
+            
+            .developer-info p {
+                font-size: 0.8rem;
+            }
+            
+            .stats-title span {
+                display: none;
+            }
+            
+            .stats-title i {
+                margin-right: 0;
+                font-size: 1.1rem;
+            }
+            
+            .college-list-item {
+                font-size: 0.8rem;
+            }
+            
+            .college-name {
+                font-size: 1.1rem;
+            }
+            
+            .meta-item {
+                font-size: 0.8rem;
+                padding: 3px 8px;
+            }
+            
+            .branch-name {
+                font-size: 1rem;
+            }
+            
+            .detail-label {
+                min-width: 80px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .top-section {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .stats-title span {
+                display: inline;
+                font-size: 0.8rem;
+            }
+        }
+        /* Add this CSS to your existing styles */
+.developer-container .organizations-section {
+    margin-top: 25px;
+    text-align: center;
+}
+
+.developer-container .organizations-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.developer-container .organization-logos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.developer-container .organization-logos a {
+    display: inline-block;
+    transition: transform 0.3s;
+}
+
+.developer-container .organization-logos a:hover {
+    transform: scale(1.1);
+}
+
+.developer-container .organization-logos img {
+    height: 50px;
+    border-radius: 5px;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.developer-container .social-icons {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.developer-container .social-icons a {
+    color: var(--primary-color);
+    margin: 0 10px;
+    font-size: 1.5rem;
+    transition: color 0.3s;
+}
+
+.developer-container .social-icons a:hover {
+    color: var(--primary-hover);
+}
+/* Add these styles to your existing CSS */
+@media (max-width: 768px) {
+    .developer-container {
+        height: 300px; /* Same height as colleges container */
+        overflow-y: auto; /* Enable vertical scrolling */
+        padding: 15px;
+    }
+    
+    .developer-photo {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 10px;
+    }
+    
+    .developer-info h2 {
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+    }
+    
+    .developer-info p {
+        font-size: 0.8rem;
+        margin: 10px 0;
+        line-height: 1.4;
+    }
+    
+    .organizations-section h3 {
+        font-size: 1rem;
+    }
+    
+    .organization-logos img {
+        height: 40px;
+    }
+    
+    .social-icons a {
+        font-size: 1.2rem;
+        margin: 0 8px;
+    }
+}
+
+/* Custom scrollbar for developer container */
+.developer-container::-webkit-scrollbar {
+    width: 5px;
+}
+
+.developer-container::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+}
+
+.developer-container::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 10px;
+}
+
+.developer-container::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-hover);
+}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>EAPCET College Finder</h1>
+        <p>Find colleges based on your rank, category, and preferred courses</p>
+    </div>
+    
+    <div class="main-grid">
+        <!-- Top Section (side-by-side, scrolls normally) -->
+        <div class="top-section">
+            <!-- Colleges List Container -->
+            <div class="colleges-container">
+                <div class="stats-container">
+                    <div class="stats-title"> 
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Total Courses</span>
+                    </div>
+                    <div class="stats-value" id="college-count">0</div>
+                </div>
+                
+                <div class="stats-container">
+                    <div class="stats-title">
+                        <i class="fas fa-list"></i>
+                        <span>Total Colleges</span>
+                    </div>
+                    <div class="stats-value" id="college-list-count">0</div>
+                </div>
+                <div class="college-list" id="college-name-list">
+                    <div class="no-colleges">Search for colleges to see results</div>
+                </div>
+            </div>
+           
+        
+        <!-- Search Container -->
+        <div class="search-container">
+            <div class="input-group">
+                <label for="rank">Enter Your EAMCET Rank:</label>
+                <div class="flex-row">
+                    <input type="text" id="rank" placeholder="e.g., 15000" inputmode="numeric" pattern="\d*">
+                    <button class="voice-btn" id="voice-rank" title="Voice Input">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                </div>
+                <div class="error-message" id="rank-error"></div>
+            </div>
+            
+            <button id="search-btn" class="party-animation">
+                <i class="fas fa-search"></i> Find Nearby Colleges
+            </button>
+        </div>
+        
+        <!-- Results Container -->
+        <div id="results">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Searching for colleges...</p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Developer Info Container -->
+<div class="developer-container">
+    <div class="developer-info">
+        <div class="developer-header">
+            <img src="https://i.postimg.cc/85qqtHJc/hello.jpg" alt="Developer" class="developer-photo">
+            <h2>About The Developer</h2>
+        </div>
+        <p>
+            Hello, I'm <strong>Laxmi Nivas Morishetty</strong>, a passionate developer, application builder, and software architect. With expertise in creating impactful digital solutions, I also thrive as a teaching expert and motivational guide, helping others unlock their potential through technology and knowledge.
+        </p>
+        <p>
+            This platform—<strong>EAPCET Rank Checker</strong>—is one of our key developments, designed to simplify and streamline rank-checking processes for users. Built with precision and user experience in mind, this application reflects our commitment to creating practical, efficient, and accessible tools.
+        </p>
+        <p>
+            Our work extends across multiple organizations, each contributing to a shared vision of innovation and empowerment. Whether it's developing software, teaching skills, or motivating individuals, our goal is to make technology work for everyone.
+        </p>
+
+        <!-- Organizations Section -->
+        <div class="organizations-section">
+            <h3>Our Organisations</h3>
+            <div class="organization-logos">
+                <a href="https://smartandlightinnovation.netlify.app/" target="_blank">
+                    <img src="https://i.postimg.cc/VkLXHccr/3.png" alt="Smart and Light Innovation">
+                </a>
+                <a href="https://wisdomroots.netlify.app/" target="_blank">
+                    <img src="https://i.postimg.cc/BnYHrwqh/4.png" alt="Wisdom Route">
+                </a>
+                <a href="https://padmatutorials.netlify.app/" target="_blank">
+                    <img src="https://i.postimg.cc/02vYDwWC/1.png" alt="Padma Tutorials">
+                </a>
+                <a href="https://nivaseditz.netlify.app/" target="_blank">
+                    <img src="https://i.postimg.cc/rF9SJw72/2.png" alt="Nivaseditz">
+                </a>
+            </div>
+        </div>
+
+        <!-- Social Icons Section -->
+        <div class="social-icons">
+            <a href="https://www.instagram.com/laxminivasmorishetty?igsh=cWJ0OXB6dWh3YnRp&utm_source=qr" target="_blank" title="Instagram">
+                <i class="fab fa-instagram"></i>
+            </a>
+            <a href="https://in.linkedin.com/in/laxmi-nivas-morishetty-02468m" target="_blank" title="LinkedIn">
+                <i class="fab fa-linkedin-in"></i>
+            </a>
+            <a href="https://wa.me/919059160424" target="_blank" title="WhatsApp">
+                <i class="fab fa-whatsapp"></i>
+            </a>
+            <a href="https://laxminivasmorishetty.netlify.app/" target="_blank" title="Website">
+                <i class="fas fa-globe"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+    <script>
+        $(document).ready(function() {
+            // Voice input for rank
+            $('#voice-rank').click(function() {
+                if (!('webkitSpeechRecognition' in window)) {
+                    showError('rank-error', "Your browser doesn't support speech recognition. Try Chrome or Edge.");
+                    return;
+                }
+                
+                const recognition = new webkitSpeechRecognition();
+                recognition.lang = 'en-IN';
+                recognition.start();
+                
+                $(this).html('<i class="fas fa-microphone-slash"></i>');
+                $(this).css('background-color', '#e74c3c');
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    // Extract numbers from speech
+                    const rankValue = transcript.replace(/\D/g, '');
+                    $('#rank').val(rankValue);
+                    $('#voice-rank').html('<i class="fas fa-microphone"></i>');
+                    $('#voice-rank').css('background-color', '');
+                };
+                
+                recognition.onerror = function(event) {
+                    showError('rank-error', 'Error occurred in recognition: ' + event.error);
+                    $('#voice-rank').html('<i class="fas fa-microphone"></i>');
+                    $('#voice-rank').css('background-color', '');
+                };
+            });
+            
+            // Validate rank input
+            $('#rank').on('input', function() {
+                const value = $(this).val();
+                if (!/^\d*$/.test(value)) {
+                    showError('rank-error', 'Please enter numbers only');
+                } else {
+                    hideError('rank-error');
+                }
+            });
+            
+            // Search colleges
+            $('#search-btn').click(function() {
+                const rank = $('#rank').val().trim();
+                
+                if (!rank) {
+                    showError('rank-error', 'Please enter your rank');
+                    $('#rank').focus();
+                    return;
+                }
+                
+                if (!/^\d+$/.test(rank)) {
+                    showError('rank-error', 'Please enter a valid rank (numbers only)');
+                    return;
+                }
+                
+                // Show loading indicator
+                $('.loading').show();
+                $('#results').children().not('.loading').remove();
+                $('#college-count').text('0');
+                $('#college-list-count').text('0');
+                $('#college-name-list').html('<div class="no-colleges">Searching for colleges...</div>');
+                
+                // Simulate API call with demo data (replace with actual API call)
+                setTimeout(function() {
+                    // This would be replaced with actual API call
+                    // For demo purposes, we'll use sample data
+                    const demoData = generateDemoData(rank);
+                    displayResults(demoData);
+                }, 1500);
+            });
+            
+            // Handle Enter key in rank input
+            $('#rank').keypress(function(e) {
+                if (e.which === 13) {
+                    $('#search-btn').click();
+                }
+            });
+            
+            function showError(elementId, message) {
+                $('#' + elementId).text(message).show();
+            }
+            
+            function hideError(elementId) {
+                $('#' + elementId).hide();
+            }
+            
+            function generateDemoData(rank) {
+                // This generates sample data for demonstration
+                // In a real app, you would get this from your API
+                const numColleges = Math.min(50, Math.max(5, 50 - Math.floor(rank/5000)));
+                const colleges = [];
+                
+                const collegeNames = [
+                    "JNTU College of Engineering",
+                    "Osmania University College of Technology",
+                    "Chaitanya Bharathi Institute of Technology",
+                    "Vasavi College of Engineering",
+                    "Gokaraju Rangaraju Institute of Engineering",
+                    "MVSR Engineering College",
+                    "CMR Institute of Technology",
+                    "St. Martin's Engineering College",
+                    "VNR Vignana Jyothi Institute of Engineering",
+                    "Anurag University"
+                ];
+                
+                const branches = [
+                    "Computer Science and Engineering",
+                    "Electronics and Communication Engineering",
+                    "Electrical and Electronics Engineering",
+                    "Mechanical Engineering",
+                    "Civil Engineering",
+                    "Artificial Intelligence",
+                    "Data Science",
+                    "Information Technology",
+                    "Biotechnology",
+                    "Chemical Engineering"
+                ];
+                
+                const categories = ["OC", "BC-A", "BC-B", "BC-C", "BC-D", "BC-E", "SC", "ST", "EWS"];
+                const genders = ["Boys", "Girls", "Co-Ed"];
+                
+                for (let i = 0; i < numColleges; i++) {
+                    const collegeName = collegeNames[Math.floor(Math.random() * collegeNames.length)];
+                    const numBranches = 1 + Math.floor(Math.random() * 4);
+                    
+                    for (let j = 0; j < numBranches; j++) {
+                        const branch = branches[Math.floor(Math.random() * branches.length)];
+                        const category = categories[Math.floor(Math.random() * categories.length)];
+                        const gender = genders[Math.floor(Math.random() * genders.length)];
+                        
+                        // Generate cutoff rank based on input rank
+                        const baseRank = parseInt(rank);
+                        const cutoffRank = baseRank + Math.floor(Math.random() * 5000) - 2500;
+                        
+                        colleges.push({
+                            name: collegeName,
+                            inst_code: "CLG" + (1000 + i),
+                            place: "Hyderabad",
+                            college_type: ["Autonomous", "Affiliated"][Math.floor(Math.random() * 2)],
+                            co_ed: gender === "Co-Ed" ? "Yes" : "No",
+                            year_established: 1980 + Math.floor(Math.random() * 30),
+                            affiliated_to: "JNTUH",
+                            branch: branch,
+                            branch_code: branch.substring(0,3).toUpperCase() + "00" + (j+1),
+                            cutoff_rank: Math.max(1, cutoffRank),
+                            category: category,
+                            gender: gender,
+                            tuition_fee: 50000 + Math.floor(Math.random() * 150000)
+                        });
+                    }
+                }
+                
+                return colleges;
+            }
+            
+            function displayResults(colleges) {
+                const resultsDiv = $('#results');
+                resultsDiv.empty();
+                
+                if (!colleges || colleges.length === 0) {
+                    resultsDiv.append(`
+                        <div class="no-results">
+                            <i class="fas fa-university"></i>
+                            <h3>No Colleges Found</h3>
+                            <p>No colleges found matching your rank. Try a different rank.</p>
+                        </div>
+                    `);
+                    
+                    $('#college-count').text('0');
+                    $('#college-list-count').text('0');
+                    $('#college-name-list').html('<div class="no-colleges">No colleges found</div>');
+                    return;
+                }
+                
+                // Update college count
+                $('#college-count').text(colleges.length);
+                
+                // Update college name list
+                const collegeNameList = $('#college-name-list');
+                collegeNameList.empty();
+                
+                // Get unique college names and count
+                const uniqueColleges = {};
+                colleges.forEach(college => {
+                    uniqueColleges[college.name] = college;
+                });
+                
+                // Add count to the college list title
+                $('#college-list-count').text(Object.keys(uniqueColleges).length);
+                
+                // Add college names to the sidebar list with numbering
+                let collegeNumber = 1;
+                Object.values(uniqueColleges).forEach(college => {
+                    collegeNameList.append(`
+                        <div class="college-list-item" data-college="${college.name}">
+                            ${collegeNumber++}. ${college.name}
+                        </div>
+                    `);
+                });
+                
+                // Group colleges by name
+                const collegeMap = {};
+                
+                colleges.forEach(college => {
+                    if (!collegeMap[college.name]) {
+                        collegeMap[college.name] = {
+                            name: college.name,
+                            inst_code: college.inst_code,
+                            place: college.place,
+                            college_type: college.college_type,
+                            co_ed: college.co_ed,
+                            year_established: college.year_established,
+                            affiliated_to: college.affiliated_to,
+                            branches: []
+                        };
+                    }
+                    
+                    collegeMap[college.name].branches.push({
+                        branch: college.branch,
+                        branch_code: college.branch_code,
+                        cutoff_rank: college.cutoff_rank,
+                        category: college.category,
+                        gender: college.gender,
+                        tuition_fee: college.tuition_fee
+                    });
+                });
+                
+                // Create separate container for each college
+                Object.values(collegeMap).forEach(college => {
+                    const collegeContainer = $('<div class="college-container"></div>');
+                    
+                    // College header with main info
+                    const collegeHeader = $(`
+                        <div class="college-header">
+                            <div class="college-name">${college.name}</div>
+                            <div class="college-meta">
+                                <span class="meta-item"><i class="fas fa-id-card"></i> ${college.inst_code}</span>
+                                <span class="meta-item"><i class="fas fa-map-marker-alt"></i> ${college.place}</span>
+                                <span class="meta-item"><i class="fas fa-school"></i> ${college.college_type}</span>
+                                <span class="meta-item"><i class="fas fa-${college.co_ed.toLowerCase() === 'yes' ? 'users' : 'user'}"></i> ${college.co_ed}</span>
+                                <span class="meta-item"><i class="fas fa-calendar-alt"></i> Est. ${college.year_established}</span>
+                                <span class="meta-item"><i class="fas fa-link"></i> ${college.affiliated_to}</span>
+                            </div>
+                        </div>
+                    `);
+                    
+                    collegeContainer.append(collegeHeader);
+                    
+                    // Branches container
+                    const branchesContainer = $('<div class="branches-container"></div>');
+                    
+                    // Create cards for each branch
+                    college.branches.forEach(branch => {
+                        const branchCard = $(`
+                            <div class="branch-card">
+                                <div class="branch-name">${branch.branch} (${branch.branch_code})</div>
+                                
+                                <div class="branch-detail">
+                                    <span class="detail-label">Cutoff Rank:</span>
+                                    <span>
+                                        <span class="category-badge ${branch.category.replace(' ', '')}">${branch.category}</span>
+                                        ${branch.cutoff_rank} 
+                                        <i class="fas fa-${branch.gender.toLowerCase() === 'girls' ? 'female' : 'male'}"></i>
+                                    </span>
+                                </div>
+                                
+                                <div class="branch-detail">
+                                    <span class="detail-label">Tuition Fee:</span>
+                                    <span>₹${branch.tuition_fee ? branch.tuition_fee.toLocaleString('en-IN') : 'N/A'}/year</span>
+                                </div>
+                            </div>
+                        `);
+                        
+                        branchesContainer.append(branchCard);
+                    });
+                    
+                    collegeContainer.append(branchesContainer);
+                    resultsDiv.append(collegeContainer);
+                });
+                
+                // Add click handler for college list items
+                $('.college-list-item').click(function() {
+                    const collegeName = $(this).data('college');
+                    const scrollPosition = $(`.college-name:contains('${collegeName}')`).offset().top - 150;
+                    $('html, body').animate({
+                        scrollTop: scrollPosition
+                    }, 500);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
