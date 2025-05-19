@@ -19072,7 +19072,11 @@ try:
                 "cutoffs": branch.get("cutoffs", {}),
                 "college_type": institute["college_type"],
                 "co_ed": institute["co_ed"],
-                "year_established": institute.get("year_established", "N/A")
+                "year_established": institute.get("year_established", "N/A"),
+                "website": institute.get("website", ""),
+                "facilities": ", ".join(institute.get("facilities", [])),
+                "seats": branch.get("seats", "N/A"),
+                "duration": branch.get("duration", "N/A")
             }
             colleges.append(college)
 except Exception as e:
@@ -19096,47 +19100,26 @@ categories = {
 def index():
     try:
         branch_names = sorted(list(set(college["branch"] for college in colleges)))
-        return render_template('index.html', categories=categories.keys(), branch_names=branch_names)
+        return render_template('index.html', 
+                            categories=categories.keys(), 
+                            branch_names=branch_names,
+                            college_types=sorted(list(set(college["college_type"] for college in colleges))))
     except Exception as e:
         print(f"Error in index route: {e}")
         return "An error occurred", 500
 
-def parse_rank_input(rank_str):
-    try:
-        digits = re.findall(r'\d+', rank_str)
-        if digits:
-            return int(''.join(digits))
-        return None
-    except Exception as e:
-        print(f"Error parsing rank: {e}")
-        return None
-
-@app.route('/voice_input', methods=['POST'])
-def voice_input():
-    try:
-        r = sr.Recognizer()
-        with sr.Microphone() as source:
-            try:
-                audio = r.listen(source, timeout=5)
-                query = r.recognize_google(audio)
-                return jsonify({'status': 'success', 'query': query})
-            except sr.WaitTimeoutError:
-                return jsonify({'status': 'error', 'message': 'No speech detected'})
-            except Exception as e:
-                return jsonify({'status': 'error', 'message': str(e)})
-    except Exception as e:
-        print(f"Error in voice input: {e}")
-        return jsonify({'status': 'error', 'message': 'Server error'}), 500
-
 @app.route('/search', methods=['POST'])
 def search():
     try:
-        # Validate and parse input
         data = request.get_json()
         if not data or not isinstance(data, dict):
             return jsonify({"error": "Invalid or missing JSON data"}), 400
             
         rank_str = data.get('rank', '')
+        selected_category = data.get('category', '')
+        selected_branch = data.get('branch', '')
+        college_type = data.get('college_type', '')
+        
         if not rank_str:
             return jsonify({"error": "Rank parameter is required"}), 400
             
@@ -19147,55 +19130,46 @@ def search():
         except ValueError:
             return jsonify({"error": "Rank must be a valid integer"}), 400
         
-        # Calculate bounds with validation
-        try:
-            threshold = max(1000, int(rank * 0.1))
-            lower_bound = max(1, rank - threshold)
-            upper_bound = rank + threshold
-        except Exception as e:
-            return jsonify({"error": f"Error calculating rank bounds: {str(e)}"}), 400
+        # Calculate bounds
+        threshold = max(1000, int(rank * 0.1))
+        lower_bound = max(1, rank - threshold)
+        upper_bound = rank + threshold
         
-        # Process colleges with null checks
-        if not isinstance(colleges, (list, tuple)):
-            return jsonify({"error": "College data not properly loaded"}), 500
-            
         results = []
         
         for college in colleges:
-            if not isinstance(college, dict):
+            # Apply filters
+            if selected_branch and college["branch"] != selected_branch:
+                continue
+            if college_type and college["college_type"] != college_type:
                 continue
                 
-            cutoffs = college.get("cutoffs")
-            if not isinstance(cutoffs, dict):
-                continue
-                
-            for category, cutoff_keys in categories.items():
-                if not isinstance(cutoff_keys, (list, tuple)):
-                    continue
-                    
-                for cutoff_key in cutoff_keys:
+            cutoffs = college.get("cutoffs", {})
+            
+            if selected_category:
+                # Search only in selected category
+                category_keys = categories.get(selected_category, [])
+                for cutoff_key in category_keys:
                     if cutoff_key in cutoffs:
                         try:
                             cutoff_rank = int(cutoffs[cutoff_key])
                             if lower_bound <= cutoff_rank <= upper_bound:
-                                result = {
-                                    "name": college.get("name", ""),
-                                    "inst_code": college.get("inst_code", ""),
-                                    "branch": college.get("branch", ""),
-                                    "branch_code": college.get("branch_code", ""),
-                                    "cutoff_rank": cutoff_rank,
-                                    "category": category,
-                                    "gender": "GIRLS" if "GIRLS" in cutoff_key else "BOYS",
-                                    "tuition_fee": college.get("tuition_fee", 0),
-                                    "affiliated_to": college.get("affiliated_to", ""),
-                                    "college_type": college.get("college_type", ""),
-                                    "co_ed": college.get("co_ed", ""),
-                                    "place": college.get("place", ""),
-                                    "year_established": college.get("year_established", "")
-                                }
+                                result = create_result(college, cutoff_rank, selected_category, cutoff_key)
                                 results.append(result)
                         except (ValueError, TypeError):
                             continue
+            else:
+                # Search in all categories
+                for category, cutoff_keys in categories.items():
+                    for cutoff_key in cutoff_keys:
+                        if cutoff_key in cutoffs:
+                            try:
+                                cutoff_rank = int(cutoffs[cutoff_key])
+                                if lower_bound <= cutoff_rank <= upper_bound:
+                                    result = create_result(college, cutoff_rank, category, cutoff_key)
+                                    results.append(result)
+                            except (ValueError, TypeError):
+                                continue
         
         # Sort results by proximity to the input rank
         results.sort(key=lambda x: abs(x["cutoff_rank"] - rank))
@@ -19214,6 +19188,28 @@ def search():
             "error": "Internal server error",
             "message": "Please try again later"
         }), 500
+
+def create_result(college, cutoff_rank, category, cutoff_key):
+    """Helper function to create a result dictionary"""
+    return {
+        "name": college.get("name", ""),
+        "inst_code": college.get("inst_code", ""),
+        "branch": college.get("branch", ""),
+        "branch_code": college.get("branch_code", ""),
+        "cutoff_rank": cutoff_rank,
+        "category": category,
+        "gender": "GIRLS" if "GIRLS" in cutoff_key else "BOYS",
+        "tuition_fee": college.get("tuition_fee", 0),
+        "affiliated_to": college.get("affiliated_to", ""),
+        "college_type": college.get("college_type", ""),
+        "co_ed": college.get("co_ed", ""),
+        "place": college.get("place", ""),
+        "year_established": college.get("year_established", ""),
+        "website": college.get("website", ""),
+        "facilities": college.get("facilities", ""),
+        "seats": college.get("seats", ""),
+        "duration": college.get("duration", "")
+    }
 
 if __name__ == '__main__':
     app.run(debug=True)
