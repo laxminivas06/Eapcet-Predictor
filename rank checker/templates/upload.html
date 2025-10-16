@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Data - EAPCET Rank Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --primary-hover: #34495e;
+            --secondary-color: #3498db;
+            --secondary-hover: #2980b9;
+            --success-color: #27ae60;
+            --success-hover: #219a52;
+            --info-color: #1abc9c;
+            --warning-color: #f39c12;
+            --text-dark: #2c3e50;
+            --text-medium: #7f8c8d;
+            --text-light: #ecf0f1;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            --info-gradient: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            --hover-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="%23ffffff" opacity="0.03"><polygon points="0,0 1000,100 1000,0"/></svg>');
+            background-size: cover;
+        }
+
+        .upload-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Header Styles */
+        .upload-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .upload-header h1 {
+            font-weight: 700;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .upload-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        /* Main Upload Card */
+        .upload-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .upload-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--success-gradient);
+        }
+
+        .card-header {
+            background: var(--success-gradient);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-bottom: none;
+            font-weight: 600;
+            font-size: 1.3rem;
+        }
+
+        .card-header i {
+            margin-right: 0.75rem;
+        }
+
+        .card-body {
+            padding: 2.5rem;
+        }
+
+        /* Form Styles */
+        .form-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .form-control {
+            border: 2px solid #e9ecef;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .form-control:focus {
+            border-color: var(--success-color);
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+            outline: none;
+        }
+
+        .form-text {
+            color: var(--text-medium);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Template Card */
+        .template-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .template-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .template-card h5 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .template-card p {
+            color: var(--text-medium);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 1rem 2rem;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+            color: white;
+        }
+
+        .btn-primary {
+            background: var(--secondary-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            border: 2px solid var(--text-medium);
+            color: var(--text-medium);
+            padding: 0.875rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-secondary:hover {
+            background: var(--text-medium);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+        }
+
+        /* Info Cards */
+        .info-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--info-gradient);
+        }
+
+        .table th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            border: none;
+            padding: 1rem;
+        }
+
+        .table td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-color: #e9ecef;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+            border: 1px solid #bee5eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .alert-info h6 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .alert-info ul {
+            margin-bottom: 0;
+        }
+
+        .alert-info li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Statistics Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .stat-card.bg-primary { background: var(--primary-color) !important; }
+        .stat-card.bg-success { background: var(--success-gradient) !important; }
+        .stat-card.bg-info { background: var(--info-gradient) !important; }
+
+        .stat-card h3 {
+            color: white;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .stat-card p {
+            color: rgba(255, 255, 255, 0.9);
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .upload-header h1 {
+                font-size: 2rem;
+            }
+
+            .upload-header p {
+                font-size: 1.1rem;
+            }
+
+            .card-body {
+                padding: 2rem;
+            }
+
+            .card-header {
+                padding: 1.25rem 1.5rem;
+                font-size: 1.2rem;
+            }
+
+            .template-card {
+                padding: 1.5rem;
+                margin-top: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            body {
+                padding: 10px;
+            }
+
+            .upload-header h1 {
+                font-size: 1.75rem;
+            }
+
+            .upload-header p {
+                font-size: 1rem;
+            }
+
+            .card-body {
+                padding: 1.5rem;
+            }
+
+            .card-header {
+                padding: 1rem 1.25rem;
+                font-size: 1.1rem;
+            }
+
+            .form-control {
+                padding: 0.875rem 1rem;
+            }
+
+            .btn {
+                padding: 0.875rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            .template-card {
+                padding: 1.25rem;
+            }
+
+            .table-responsive {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .upload-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .card-body {
+                padding: 1.25rem;
+            }
+
+            .stat-card {
+                padding: 1.25rem;
+            }
+
+            .stat-card h3 {
+                font-size: 1.75rem;
+            }
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stagger-delay-1 { animation-delay: 0.1s; }
+        .stagger-delay-2 { animation-delay: 0.2s; }
+        .stagger-delay-3 { animation-delay: 0.3s; }
+
+        /* File Upload Styling */
+        .file-upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: rgba(248, 249, 250, 0.5);
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--success-color);
+            background: rgba(39, 174, 96, 0.05);
+        }
+
+        .file-upload-area.dragover {
+            border-color: var(--success-color);
+            background: rgba(39, 174, 96, 0.1);
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <!-- Header -->
+        <div class="upload-header fade-in">
+            <h1>Data Upload Center</h1>
+            <p>Upload and manage college data for EAPCET Rank Predictor</p>
+        </div>
+
+        <!-- Main Upload Section -->
+        <div class="upload-card fade-in">
+            <div class="card-header">
+                <h4><i class="fas fa-file-upload"></i> Upload College Data</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Upload Form -->
+                    <div class="col-lg-6">
+                        <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                            <div class="mb-4">
+                                <label for="file" class="form-label">Select Excel File</label>
+                                <div class="file-upload-area">
+                                    <input class="form-control" type="file" id="file" name="file" accept=".xlsx,.xls" required>
+                                    <div class="form-text mt-2">Supported formats: .xlsx, .xls</div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fas fa-upload"></i> Upload and Process
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Template Download -->
+                    <div class="col-lg-6">
+                        <div class="template-card fade-in stagger-delay-1">
+                            <h5><i class="fas fa-download"></i> Download Template</h5>
+                            <p class="text-muted">Get the Excel template with proper formatting to ensure successful data upload</p>
+                            <a href="{{ url_for('download_template') }}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-file-excel"></i> Download Template
+                            </a>
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    Includes sample data and correct column format
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Admin Panel
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Column Format Guide -->
+        <div class="info-card fade-in stagger-delay-1">
+            <div class="card-header" style="background: var(--info-gradient);">
+                <h5><i class="fas fa-info-circle"></i> Required Column Format</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Column Name</th>
+                                <th>Description</th>
+                                <th>Example</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Inst Code</strong></td>
+                                <td>Unique college code</td>
+                                <td>AARM</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Institute Name</strong></td>
+                                <td>Full college name</td>
+                                <td>AAR MAHAVEER ENGINEERING COLLEGE</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Place</strong></td>
+                                <td>City/Town name</td>
+                                <td>BANDLAGUDA</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Dist Code</strong></td>
+                                <td>District code</td>
+                                <td>HYD</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Co Education</strong></td>
+                                <td>COED/BOYS/GIRLS</td>
+                                <td>COED</td>
+                            </tr>
+                            <tr>
+                                <td><strong>College Type</strong></td>
+                                <td>PVT/GOVT</td>
+                                <td>PVT</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Year of Estab</strong></td>
+                                <td>Year established</td>
+                                <td>2010</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Branch Code</strong></td>
+                                <td>Branch short code</td>
+                                <td>CSE</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Branch Name</strong></td>
+                                <td>Full branch name</td>
+                                <td>COMPUTER SCIENCE AND ENGINEERING</td>
+                            </tr>
+                            <tr>
+                                <td><strong>OC BOYS, OC GIRLS, etc.</strong></td>
+                                <td>Cutoff ranks for each category</td>
+                                <td>26588</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tuition Fee</strong></td>
+                                <td>Annual fee in rupees</td>
+                                <td>60000</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Affiliated To</strong></td>
+                                <td>University name</td>
+                                <td>JNTUH</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Important Notes -->
+                <div class="alert alert-info mt-4">
+                    <h6><i class="fas fa-lightbulb"></i> Important Notes:</h6>
+                    <ul class="mb-0">
+                        <li><strong>Download the template</strong> to ensure correct column order and format</li>
+                        <li>One college can have multiple branches (use same Inst Code for all branches of same college)</li>
+                        <li>Cutoff ranks should be integer values only</li>
+                        <li>Empty cutoff cells will be treated as 0 (no cutoff)</li>
+                        <li>Column names and order must match exactly for successful processing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Statistics -->
+        <div class="info-card fade-in stagger-delay-2">
+            <div class="card-header" style="background: var(--primary-color);">
+                <h5><i class="fas fa-table"></i> Current Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="stats-grid">
+                    <div class="stat-card bg-primary text-white">
+                        <h3>{{ total_colleges }}</h3>
+                        <p>Colleges</p>
+                    </div>
+                    <div class="stat-card bg-success text-white">
+                        <h3>{{ total_branches }}</h3>
+                        <p>Branches</p>
+                    </div>
+                    <div class="stat-card bg-info text-white">
+                        <h3>{{ colleges_data.institutes|length if colleges_data else 0 }}</h3>
+                        <p>Data Entries</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadForm = document.getElementById('uploadForm');
+            const fileInput = document.getElementById('file');
+            const fileUploadArea = document.querySelector('.file-upload-area');
+
+            // Drag and drop functionality
+            fileUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+
+            fileUploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+
+            fileUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    
+                    // Show file name
+                    const fileName = files[0].name;
+                    this.innerHTML = `
+                        <div class="text-success">
+                            <i class="fas fa-check-circle fa-2x mb-2"></i>
+                            <div><strong>${fileName}</strong></div>
+                            <small class="text-muted">File selected successfully</small>
+                        </div>
+                        <input class="form-control d-none" type="file" id="file" name="file" accept=".xlsx,.xls" required>
+                    `;
+                }
+            });
+
+            // File input change handler
+            fileInput.addEventListener('change', function(e) {
+                if (this.files.length > 0) {
+                    const fileName = this.files[0].name;
+                    fileUploadArea.innerHTML = `
+                        <div class="text-success">
+                            <i class="fas fa-check-circle fa-2x mb-2"></i>
+                            <div><strong>${fileName}</strong></div>
+                            <small class="text-muted">File selected successfully</small>
+                        </div>
+                        <input class="form-control d-none" type="file" id="file" name="file" accept=".xlsx,.xls" required>
+                    `;
+                }
+            });
+
+            // Form submission handler
+            uploadForm.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                
+                if (fileInput.files.length > 0) {
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                    submitBtn.disabled = true;
+                    
+                    // Revert after 5 seconds if still on page
+                    setTimeout(() => {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    }, 5000);
+                }
+            });
+
+            // Add animation to cards on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all cards for animation
+            document.querySelectorAll('.upload-card, .info-card, .template-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - EAPCET Rank Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --primary-hover: #34495e;
+            --secondary-color: #3498db;
+            --secondary-hover: #2980b9;
+            --success-color: #27ae60;
+            --success-hover: #219a52;
+            --danger-color: #e74c3c;
+            --danger-hover: #c0392b;
+            --warning-color: #f39c12;
+            --info-color: #1abc9c;
+            --text-dark: #2c3e50;
+            --text-medium: #7f8c8d;
+            --text-light: #ecf0f1;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            --danger-gradient: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            --hover-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="%23ffffff" opacity="0.03"><polygon points="0,0 1000,100 1000,0"/></svg>');
+            background-size: cover;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Header Styles */
+        .admin-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--success-gradient);
+        }
+
+        .admin-header h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 2.2rem;
+        }
+
+        .admin-header p {
+            color: var(--text-medium);
+            font-size: 1.1rem;
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .admin-header i {
+            color: var(--success-color);
+            margin-right: 0.75rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--bg-gradient);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .stat-label {
+            color: var(--text-medium);
+            font-weight: 500;
+            font-size: 1rem;
+        }
+
+        /* Actions Grid */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .card-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .upload-header {
+            background: var(--success-gradient);
+        }
+
+        .manage-header {
+            background: var(--danger-gradient);
+        }
+
+        .card-header i {
+            margin-right: 0.75rem;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .card-body p {
+            color: var(--text-medium);
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 1rem 2rem;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            width: 100%;
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+            color: white;
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+        }
+
+        /* Navigation */
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--primary-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            box-shadow: var(--card-shadow);
+        }
+
+        .nav-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .nav-btn i {
+            margin-right: 0.5rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .admin-header {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .admin-header h2 {
+                font-size: 1.8rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .stat-card {
+                padding: 1.5rem;
+            }
+
+            .card-body {
+                padding: 1.5rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .stat-icon {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            body {
+                padding: 10px;
+            }
+
+            .admin-header {
+                padding: 1.25rem;
+                border-radius: 15px;
+            }
+
+            .admin-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .admin-header p {
+                font-size: 1rem;
+            }
+
+            .stat-card {
+                padding: 1.25rem;
+                border-radius: 15px;
+            }
+
+            .action-card {
+                border-radius: 15px;
+            }
+
+            .card-body {
+                padding: 1.25rem;
+            }
+
+            .card-header {
+                padding: 1.25rem 1.5rem;
+                font-size: 1.1rem;
+            }
+
+            .btn {
+                padding: 0.875rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .nav-btn {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .admin-header {
+                padding: 1rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            .stat-number {
+                font-size: 1.75rem;
+            }
+
+            .stat-icon {
+                font-size: 1.75rem;
+            }
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stagger-delay-1 { animation-delay: 0.1s; }
+        .stagger-delay-2 { animation-delay: 0.2s; }
+        .stagger-delay-3 { animation-delay: 0.3s; }
+        .stagger-delay-4 { animation-delay: 0.4s; }
+
+        /* Custom confirm dialog enhancement */
+        .confirm-dialog {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: var(--hover-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Admin Header -->
+        <div class="admin-header fade-in">
+            <h2><i class="fas fa-cog"></i> Admin Panel</h2>
+            <p>Welcome, {{ username }}! Manage college data and cutoff ranks</p>
+        </div>
+
+        <!-- Statistics Grid -->
+        <div class="stats-grid">
+            <div class="stat-card fade-in stagger-delay-1">
+                <i class="fas fa-university stat-icon"></i>
+                <span class="stat-number">{{ total_colleges }}</span>
+                <span class="stat-label">Total Colleges</span>
+            </div>
+            
+            <div class="stat-card fade-in stagger-delay-2">
+                <i class="fas fa-code-branch stat-icon"></i>
+                <span class="stat-number">{{ total_branches }}</span>
+                <span class="stat-label">Total Branches</span>
+            </div>
+            
+            <div class="stat-card fade-in stagger-delay-3">
+                <i class="fas fa-database stat-icon"></i>
+                <span class="stat-number">{{ colleges_data.institutes|length }}</span>
+                <span class="stat-label">Data Entries</span>
+            </div>
+        </div>
+
+        <!-- Actions Grid -->
+        <div class="actions-grid">
+            <!-- Upload Data Card -->
+            <div class="action-card fade-in stagger-delay-1">
+                <div class="card-header upload-header">
+                    <h5><i class="fas fa-upload"></i> Upload Data</h5>
+                </div>
+                <div class="card-body">
+                    <p>Upload Excel file with college and cutoff data to update the database with new information.</p>
+                    <a href="{{ url_for('admin_upload') }}" class="btn btn-success">
+                        <i class="fas fa-file-excel"></i> Upload Excel File
+                    </a>
+                </div>
+            </div>
+
+            <!-- Manage Data Card -->
+            <div class="action-card fade-in stagger-delay-2">
+                <div class="card-header manage-header">
+                    <h5><i class="fas fa-trash"></i> Manage Data</h5>
+                </div>
+                <div class="card-body">
+                    <p>Clear all existing college data from the system. This action cannot be undone.</p>
+                    <form action="{{ url_for('admin_clear') }}" method="POST" 
+                          onsubmit="return confirmAction('Are you sure you want to clear all data? This action cannot be undone.')">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash-alt"></i> Clear All Data
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Options Grid -->
+        <div class="actions-grid">
+            <!-- View Data Card -->
+            <div class="action-card fade-in stagger-delay-3">
+                <div class="card-header" style="background: var(--bg-gradient);">
+                    <h5><i class="fas fa-eye"></i> View Data</h5>
+                </div>
+                <div class="card-body">
+                    <p>View current college data in JSON format for inspection and verification.</p>
+                    <a href="{{ url_for('admin_data') }}" target="_blank" class="btn" 
+                       style="background: var(--bg-gradient); color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                        <i class="fas fa-database"></i> View JSON Data
+                    </a>
+                </div>
+            </div>
+
+            <!-- Download Template Card -->
+            <div class="action-card fade-in stagger-delay-4">
+                <div class="card-header" style="background: var(--info-color);">
+                    <h5><i class="fas fa-download"></i> Get Template</h5>
+                </div>
+                <div class="card-body">
+                    <p>Download the Excel template with proper formatting for easy data entry.</p>
+                    <a href="{{ url_for('download_template') }}" class="btn" 
+                       style="background: var(--info-color); color: white; box-shadow: 0 4px 15px rgba(26, 188, 156, 0.3);">
+                        <i class="fas fa-file-download"></i> Download Template
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="nav-buttons">
+            <a href="{{ url_for('index') }}" class="nav-btn">
+                <i class="fas fa-home"></i> Back to Home
+            </a>
+            <a href="{{ url_for('admin_logout') }}" class="nav-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enhanced confirm dialog
+            window.confirmAction = function(message) {
+                return confirm(message);
+            };
+
+            // Add loading states to buttons
+            const buttons = document.querySelectorAll('.btn, .nav-btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    if (this.type === 'submit' || this.href) {
+                        const originalText = this.innerHTML;
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                        this.disabled = true;
+                        
+                        // Revert after 3 seconds if still on page
+                        setTimeout(() => {
+                            this.innerHTML = originalText;
+                            this.disabled = false;
+                        }, 3000);
+                    }
+                });
+            });
+
+            // Add animation to cards on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all cards for animation
+            document.querySelectorAll('.stat-card, .action-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+
+            // Add hover sound effects (optional)
+            const hoverSound = () => {
+                // Could add subtle sound effects here
+            };
+
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', hoverSound);
+            });
+        });
+    </script>
+</body>
+</html>
