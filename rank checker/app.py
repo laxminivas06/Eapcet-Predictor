@@ -615,7 +615,7 @@ def admin_clear():
             flash('All data cleared successfully!', 'success')
         else:
             flash('Error clearing data', 'error')
-    except Exception as e:
+    except Exception as e: 
         flash(f'Error: {str(e)}', 'error')
     
     return redirect(url_for('admin_dashboard'))
